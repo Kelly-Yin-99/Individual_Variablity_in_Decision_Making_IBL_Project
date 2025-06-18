@@ -89,11 +89,6 @@ def compute_population_rate(spikes_times, spikes_clusters, valid_cluster_ids, st
     avg_firing_rate = counts_per_bin / len(valid_cluster_ids)/bin_size
     return avg_firing_rate
 
-
-
-
-
-
 def compute_spiking_metrics_iti(pid, one, region_of_interest, atlas=AllenAtlas(), bin_sizes=[0.01]):
     session_id, _ = one.pid2eid(pid)
     session_id = str(session_id)
@@ -180,7 +175,7 @@ def compute_spiking_metrics_iti(pid, one, region_of_interest, atlas=AllenAtlas()
         print(f"Session {session_id} skipped: less than 10 valid clusters during ITI.")
         return None
 
-    # Step 3: Compute spike count threshold and collect per-ITI segments in parallel
+    # Compute spike count threshold and collect per-ITI segments in parallel
     total_spikes = 0
     iti_segments_by_bin = {f"{int(bin_size * 1000)}ms": [] for bin_size in bin_sizes}
     durations = []
@@ -211,7 +206,7 @@ def compute_spiking_metrics_iti(pid, one, region_of_interest, atlas=AllenAtlas()
         print(f"Session {session_id} skipped: total spikes in ITI = {total_spikes}")
         return None
 
-    # Step 4: Compute power spectrum for each bin size
+    # Compute power spectrum for each bin size
     results = {
         'session_id': session_id,
         'pid': pid,
@@ -251,4 +246,48 @@ def compute_spiking_metrics_iti(pid, one, region_of_interest, atlas=AllenAtlas()
         }
 
     return results
+
+
+
+def process_one_region(region, pid_list):
+    print(f"\n Processing region: {region} ({len(pid_list)} PIDs)")
+  
+
+    region_results = []
+    for pid in pid_list:
+        try:
+            result = compute_spiking_metrics_iti(pid, one, region)
+            if result:
+                region_results.append(result)
+        except Exception as e:
+            print(f" PID {pid} in {region} failed: {e}")
+    return region, region_results
+
+
+
+
+
+### Load ephys info and define paths, parallel processing all regions,  and save all-region results to json file
+
+ephys_path = "/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/HMM_Results/ephys_session_info.pkl"
+with open(ephys_path, "rb") as f:
+    ephys_info = pickle.load(f)
+
+successful_pids_all_regions = ephys_info["successful_pids_ephys"]
+
+region_results_list = Parallel(n_jobs=20)(  
+    delayed(process_one_region)(region, pid_list)
+    for region, pid_list in successful_pids_all_regions.items()
+)
+
+
+all_results = {region: results for region, results in region_results_list if results}
+output_path = "/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/HMM_Results/power_specturm_iti.json"
+with open(output_path, "w") as f:
+    json.dump(all_results, f, indent=2)
+
+print(f"\n Saved all results to {output_path}")
+
+
+
 
