@@ -1,3 +1,99 @@
+import numpy as np
+import pandas as pd
+from one.api import ONE
+from iblatlas.atlas import AllenAtlas 
+from brainbox.io.one import SpikeSortingLoader, SessionLoader
+import os
+from pathlib import Path
+atlas = AllenAtlas()
+ONE.setup(base_url='https://openalyx.internationalbrainlab.org', silent=True,
+          cache_dir=Path('/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org'))
+one = ONE(base_url='https://openalyx.internationalbrainlab.org', password=os.getenv('ALYX_PASSWORD'))
+from datetime import datetime
+import pickle
+import json
+from joblib import Parallel, delayed
+from sklearn.decomposition import PCA
+from scipy.stats import entropy
+from collections import defaultdict
+from scipy.fft import rfft, rfftfreq
+from collections import defaultdict
+
+
+# Define acronym match priority: longest/specific names come first
+ACRONYM_PREFIXES = [
+    # VIS-related
+    'VISam', 'VISal', 'VISpm', 'VISpl', 'VISpor', 'VISli', 'VISrl',
+    'VISa', 'VISp', 'VISl',
+
+    # AUD-related
+    'AUDpo', 'AUDp', 'AUDv', 'AUDd',
+
+    # RSP
+    'RSPagl', 'RSPd', 'RSPv',
+
+    # Other brain areas
+    'FRP', 'ACAd', 'ACAv', 'PL', 'ILA', 'ORBl', 'ORBm', 'ORBvl',
+    'AId', 'AIv', 'AIp', 'GU', 'VISC', 'TEa', 'PERI', 'ECT',
+    'SSs', 'SSp', 'MOs', 'MOp','SCop', 'SCsg', 'SCzo','ICc', 'ICd', 'ICe',
+    'CA1', 'CA2', 'CA3', 'SUB','PRE','POST'
+]
+
+# Build matching rule list using simple startswith
+ACRONYM_RULES = [
+    (prefix, lambda a, p=prefix: a.startswith(p)) for prefix in ACRONYM_PREFIXES
+]
+
+def classify_acronym(acronym):
+    for region, rule in ACRONYM_RULES:
+        if rule(acronym):
+            return region
+    return None
+
+def extract_power_and_relative_power(signal, sampling_rate, max_freq=50, bin_width=0.1):
+    n = len(signal)
+    freqs = fftfreq(n, d=1 / sampling_rate)
+    fft_vals = fft(signal)
+    power = np.abs(fft_vals) ** 2
+
+    # Full range for output (0 to max_freq)
+    full_mask = (freqs >= 0) & (freqs <= max_freq)
+    freqs_full = freqs[full_mask]
+    power_full = power[full_mask]
+
+    # Bin frequencies to nearest bin_width (e.g., 0.1 Hz)
+    rounded_freqs = np.round(freqs_full / bin_width) * bin_width
+    power_binned = {}
+    for f, p in zip(rounded_freqs, power_full):
+        f_key = f"{f:.1f}Hz"
+        power_binned[f_key] = power_binned.get(f_key, 0.0) + float(p)
+
+    # Relative power (only use 1 to 49 Hz for normalization and 4–12 Hz for numerator)
+    rel_mask = (freqs >= 1) & (freqs <= 49)
+    freqs_rel = freqs[rel_mask]
+    power_rel = power[rel_mask]
+
+    total_power = np.sum(power_rel)
+    band_power = np.sum([p for f, p in zip(freqs_rel, power_rel) if 4 <= f <= 12])
+    rel_power = {'4-12Hz': float(band_power / total_power) if total_power > 0 else np.nan}
+
+    return power_binned, rel_power
+
+def compute_population_rate(spikes_times, spikes_clusters, valid_cluster_ids, start, end, bin_size):
+    time_bins = np.arange(start, end, bin_size)
+    counts_per_bin = np.zeros(len(time_bins) - 1)
+    for cid in valid_cluster_ids:
+        spike_times = spikes_times[spikes_clusters == cid]
+        counts, _ = np.histogram(spike_times, bins=time_bins)
+        counts_per_bin += counts
+    avg_firing_rate = counts_per_bin / len(valid_cluster_ids)/bin_size
+    return avg_firing_rate
+
+
+
+
+
+
 def compute_spiking_metrics_iti(pid, one, region_of_interest, atlas=AllenAtlas(), bin_sizes=[0.01]):
     session_id, _ = one.pid2eid(pid)
     session_id = str(session_id)
