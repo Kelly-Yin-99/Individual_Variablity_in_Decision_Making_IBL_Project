@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from one.api import ONE
-from iblatlas.atlas import AllenAtlas
+from iblatlas.atlas import AllenAtlas 
 from brainbox.io.one import SpikeSortingLoader, SessionLoader
 import os
 from pathlib import Path
