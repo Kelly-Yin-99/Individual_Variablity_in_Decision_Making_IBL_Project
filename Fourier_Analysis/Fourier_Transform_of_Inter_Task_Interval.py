@@ -269,7 +269,7 @@ def process_one_region(region, pid_list):
 
 ### Load ephys info and define paths, parallel processing all regions,  and save all-region results to json file
 
-ephys_path = "/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/HMM_Results/ephys_session_info.pkl"
+ephys_path = "/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/ephys_session_info.pkl"
 with open(ephys_path, "rb") as f:
     ephys_info = pickle.load(f)
 
@@ -282,7 +282,7 @@ region_results_list = Parallel(n_jobs=20)(
 
 
 all_results = {region: results for region, results in region_results_list if results}
-output_path = "/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/HMM_Results/power_specturm_iti.json"
+output_path = "/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/power_specturm_iti.json"
 with open(output_path, "w") as f:
     json.dump(all_results, f, indent=2)
 
