@@ -16,7 +16,7 @@ if not region_data:
 
 # Extract all bin sizes from the first session
 bin_sizes = list(region_data[0]["bin_sizes"].keys())
-output_dir = "/Users/naokihiratani/Documents/power_spectrum_iti"
+output_dir = "/Users/Documents/power_spectrum_iti"
 os.makedirs(output_dir, exist_ok=True)
 pdf = PdfPages(os.path.join(output_dir, "power_spectrum.pdf"))
 
