@@ -1,4 +1,4 @@
-from concurrent.futures import ProcessPoolExecutor
+
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -6,12 +6,8 @@ import ssm
 from one.api import ONE
 from sklearn.model_selection import KFold
 from iblatlas.atlas import AllenAtlas
-from brainbox.io.one import SpikeSortingLoader
 import traceback
 from brainbox.io.one import SessionLoader
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from brainbox.io.one import SpikeSortingLoader
 from iblatlas.atlas import AllenAtlas
@@ -472,10 +468,8 @@ def process_task(task):
     results = compute_HMM(pid, one, region, result_df)
     base_output_dir = "HMM_Results1"
 
-    #print(f"🔍 process_task: compute_HMM returned: {results}")  # Debug print
-
     if results is None:
-        print(f"⚠️ process_task: No valid results for pid {pid}, region {region}")
+        print(f"process_task: No valid results for pid {pid}, region {region}")
         return None
 
     (
@@ -483,7 +477,7 @@ def process_task(task):
         transition_matrix, stationary_distribution, state_representations, hidden_states_range, rL, rR, mean_firing_rate, additional_data, neuron_mean_firing_rates, pid
     ) = results
 
-    # **确保 neuron_mean_firing_rates 形状正确**
+
     neuron_mean_firing_rates = np.array(neuron_mean_firing_rates)
     if neuron_mean_firing_rates.shape[0] != state_representations.shape[1]:
         raise ValueError(f"Mismatch: neuron_mean_firing_rates ({neuron_mean_firing_rates.shape}) vs state_representations ({state_representations.shape})")
@@ -493,13 +487,13 @@ def process_task(task):
     state_representations_2 = (state_representations - neuron_mean_firing_rates[None, :]) / np.std(state_representations, axis=0, keepdims=True)
     state_representations_3 = state_representations - neuron_mean_firing_rates[None, :]
 
-    # **计算 state 距离矩阵 (dij, sij) 三种版本**
+    # 
     dij_df   = compute_state_distances(state_representations, session_id, pid,  mean_firing_rate)
     dij_df_1 = compute_state_distances(state_representations_1, session_id, pid, mean_firing_rate)
     dij_df_2 = compute_state_distances(state_representations_2, session_id, pid, mean_firing_rate)
     dij_df_3 = compute_state_distances(state_representations_3, session_id, pid, mean_firing_rate)
 
-    # **转换 dij_df 到 sij 矩阵**
+    # 
     sij_matrix = np.zeros((best_K, best_K))
     sij_matrix_1 = np.zeros((best_K, best_K))
     sij_matrix_2 = np.zeros((best_K, best_K))
@@ -642,10 +636,10 @@ def plot_HMM_parallel(regions_of_interest, successful_pids, result_df,
             task = future_to_task[future]
             try:
                 result = future.result()
-                #print(f"✅ Task {task} returned")  # Debug print
+                #print(f" Task {task} returned")  # Debug print
 
                 if result is None:
-                    #print(f"⚠️ Skipping task {task}: Result is None")
+                    #print(f"Skipping task {task}: Result is None")
                     continue
 
                 session_id = result['session_id']
@@ -685,7 +679,7 @@ def plot_HMM_parallel(regions_of_interest, successful_pids, result_df,
     with open(combined_output_file, 'wb') as f:
         pickle.dump(all_additional_data, f)
 
-    print(f"✅ All session additional data saved to {combined_output_file}")
+    print(f"All session additional data saved to {combined_output_file}")
 
     combined_data = {
         'summary_data': region_dfs,
@@ -702,7 +696,7 @@ def plot_HMM_parallel(regions_of_interest, successful_pids, result_df,
     with open(combined_output_file_final, 'wb') as f:
         pickle.dump(combined_data, f)
 
-    print(f"✅ All data (summary, sij, sij_1, sij_2, sij_3, ri_trial, additional) saved to {combined_output_file_final}")
+    print(f"All data (summary, sij, sij_1, sij_2, sij_3, ri_trial, additional) saved to {combined_output_file_final}")
 
     for region, df in region_dfs.items():
          print(f"Region: {region}, Unique PIDs: {df['pid'].nunique()}")
