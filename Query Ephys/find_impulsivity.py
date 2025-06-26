@@ -28,12 +28,12 @@ summary_rows = []
 for region in ACRONYM_PREFIXES:
     behavior_path = os.path.join(behavior_dir, f"{region}_behavior.pkl")
     if not os.path.exists(behavior_path):
-        print(f"❌ Skipping {region} (no behavior file)")
+        print(f"Skipping {region} (no behavior file)")
         continue
 
     df = pd.read_pickle(behavior_path)
     if df.empty:
-        print(f"⚠️ {region} behavior file is empty.")
+        print(f"{region} behavior file is empty.")
         continue
 
     # ➤ 计算反应时间和 impulsive 标记
@@ -71,4 +71,4 @@ summary_df = pd.concat(summary_rows, ignore_index=True)
 # === 保存为 CSV ===
 output_path = "/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/HMM_Results/summary_impulsivity_by_session_1.csv"
 summary_df.to_csv(output_path, index=False)
-print(f"✅ Saved summary to {output_path}")
+print(f"Saved summary to {output_path}")
