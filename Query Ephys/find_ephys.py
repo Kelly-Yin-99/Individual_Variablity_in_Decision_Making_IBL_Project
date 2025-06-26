@@ -114,9 +114,9 @@ def process_single_session(session_id, cluster_qc):
                     ])
                 if combined_cluster_ids:
                     region_cluster_counts[combined_acronym] = combined_cluster_ids
-                    if combined_acronym not in region_to_pids:  # ✅ Create a mapping for the region
+                    if combined_acronym not in region_to_pids:  
                         region_to_pids[combined_acronym] = set()
-                    region_to_pids[combined_acronym].add(pid)  # ✅ Add PID to its correct region
+                    region_to_pids[combined_acronym].add(pid)  
 
 
         session_results = {
@@ -150,7 +150,7 @@ def process_all_sessions_rep(session_ids, cluster_qc):
 
     start_time = time.time()
     for idx, session_id in enumerate(session_ids):
-        result, region_to_pids = process_single_session(session_id, cluster_qc)  # ✅ Get region-to-PID mapping
+        result, region_to_pids = process_single_session(session_id, cluster_qc)  
         if result:
             processed_sessions.append(result)
 
@@ -160,9 +160,8 @@ def process_all_sessions_rep(session_ids, cluster_qc):
                     successful_pids[region] = set()
                 
                 successful_session_ids[region].add(session_id)
-                successful_pids[region].update(pids_in_region)  # ✅ Correctly associate PIDs with regions
+                successful_pids[region].update(pids_in_region) 
 
-            # ✅ Add unique acronyms (region names) to the set
             unique_acronyms_set.update(region_to_pids.keys())
 
         elapsed_time = time.time() - start_time
@@ -737,7 +736,20 @@ ephys_session_id = ['3a3ea015-b5f4-4e8b-b189-9364d1fc7435',
  'b196a2ad-511b-4e90-ac99-b5a29ad25c22',
  '1b715600-0cbc-442c-bd00-5b0ac2865de1',
  '5dcee0eb-b34d-4652-acc3-d10afc6eae68',
- 'c7bf2d49-4937-4597-b307-9f39cb1c7b16']
+ 'c7bf2d49-4937-4597-b307-9f39cb1c7b16',
+ 'ebce500b-c530-47de-8cb1-963c552703ea',
+ '5ae68c54-2897-4d3a-8120-426150704385',
+ '15b69921-d471-4ded-8814-2adad954bcd8',
+ '6899a67d-2e53-4215-a52a-c7021b5da5d4',
+ 'ca4ecb4c-4b60-4723-9b9e-2c54a6290a53',
+ '6ab9d98c-b1e9-4574-b8fe-b9eec88097e0',
+ '239dd3c9-35f3-4462-95ee-91b822a22e6b',
+ 'b196a2ad-511b-4e90-ac99-b5a29ad25c22',
+ '1b715600-0cbc-442c-bd00-5b0ac2865de1',
+ '5dcee0eb-b34d-4652-acc3-d10afc6eae68',
+ 'c7bf2d49-4937-4597-b307-9f39cb1c7b16',
+ '3a3ea015-b5f4-4e8b-b189-9364d1fc7435',
+ 'd85c454e-8737-4cba-b6ad-b2339429d99b']
  
  
 processed_sessions_ephys, unique_acronyms_set_ephys, successful_session_ids_ephys,successful_pids_ephys = process_all_sessions_rep(ephys_session_id,0)
@@ -745,7 +757,7 @@ processed_sessions_ephys, unique_acronyms_set_ephys, successful_session_ids_ephy
 
 base_output_dir="/storage1/fs1/hiratani/Active/shared/ibl_space/ONE/openalyx.internationalbrainlab.org/HMM_Results"
 
-# Define dictionary to store session information
+#  dictionary to store session information
 rep_session_info = {
     "processed_sessions_ephys": processed_sessions_ephys,
     "unique_acronyms_set_ephys": unique_acronyms_set_ephys,
@@ -753,15 +765,15 @@ rep_session_info = {
     "successful_pids_ephys": successful_pids_ephys
 }
 
-# Ensure the output directory exists
+
 os.makedirs(base_output_dir, exist_ok=True)
 
-# Define the pickle file path
+
 pkl_file_path = os.path.join(base_output_dir, "ephys_session_info_1.pkl")
 
 # Save dictionary to a pickle file
 with open(pkl_file_path, "wb") as f:
     pickle.dump(rep_session_info, f)
 
-print(f"✅ ephys_session_info saved to {pkl_file_path}")
+print(f" ephys_session_info saved to {pkl_file_path}")
 
