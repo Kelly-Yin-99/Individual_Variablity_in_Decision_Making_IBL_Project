@@ -736,20 +736,7 @@ ephys_session_id = ['3a3ea015-b5f4-4e8b-b189-9364d1fc7435',
  'b196a2ad-511b-4e90-ac99-b5a29ad25c22',
  '1b715600-0cbc-442c-bd00-5b0ac2865de1',
  '5dcee0eb-b34d-4652-acc3-d10afc6eae68',
- 'c7bf2d49-4937-4597-b307-9f39cb1c7b16',
- 'ebce500b-c530-47de-8cb1-963c552703ea',
- '5ae68c54-2897-4d3a-8120-426150704385',
- '15b69921-d471-4ded-8814-2adad954bcd8',
- '6899a67d-2e53-4215-a52a-c7021b5da5d4',
- 'ca4ecb4c-4b60-4723-9b9e-2c54a6290a53',
- '6ab9d98c-b1e9-4574-b8fe-b9eec88097e0',
- '239dd3c9-35f3-4462-95ee-91b822a22e6b',
- 'b196a2ad-511b-4e90-ac99-b5a29ad25c22',
- '1b715600-0cbc-442c-bd00-5b0ac2865de1',
- '5dcee0eb-b34d-4652-acc3-d10afc6eae68',
- 'c7bf2d49-4937-4597-b307-9f39cb1c7b16',
- '3a3ea015-b5f4-4e8b-b189-9364d1fc7435',
- 'd85c454e-8737-4cba-b6ad-b2339429d99b']
+ 'c7bf2d49-4937-4597-b307-9f39cb1c7b16']
  
  
 processed_sessions_ephys, unique_acronyms_set_ephys, successful_session_ids_ephys,successful_pids_ephys = process_all_sessions_rep(ephys_session_id,0)
